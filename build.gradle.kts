@@ -22,3 +22,6 @@ tasks.test {
 tasks.withType<KotlinCompile> {
     kotlinOptions.jvmTarget = "1.8"
 }
+dependencies {
+    implementation("org.jetbrains.kotlinx:kotlinx-datetime:0.4.0")
+}
