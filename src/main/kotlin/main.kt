@@ -4,11 +4,24 @@ import kotlinx.datetime.*
 import java.time.LocalTime
 import kotlin.system.exitProcess
 
-enum class DueTag {
-    T, I, O
+enum class DueTag (val color: String) {
+    T("\u001B[103m \u001B[0m"),
+    I("\u001B[102m \u001B[0m"),
+    O("\u001B[101m \u001B[0m")
+}
+
+enum class Priority (val color: String) {
+    C("\u001B[101m \u001B[0m"),
+    H("\u001B[103m \u001B[0m"),
+    N("\u001B[102m \u001B[0m"),
+    L("\u001B[104m \u001B[0m")
 }
 
 fun main() {
+    val red = "\u001B[101m \u001B[0m"
+    val yellow = "\u001B[103m \u001B[0m"
+    val green = "\u001B[102m \u001B[0m"
+    val blue = "\u001B[104m \u001B[0m"
     val taskList = mutableListOf(mutableListOf<Any>())
     taskList.clear()
     menu(taskList)
@@ -42,24 +55,26 @@ fun menu (taskList: MutableList<MutableList<Any>>) {
             println("Tasklist exiting!")
             exit()
         } else if (input == "edit") {
+            if (taskList.isNotEmpty()) printTaskList(taskList)
             editTask(taskList)
             continue@loop
         } else if (input == "delete") {
+            if (taskList.isNotEmpty()) printTaskList(taskList)
             deleteTask(taskList)
             continue@loop
         } else println("The input action is invalid")
     }
 }
 
-fun dueDate (date: String): DueTag {
+fun dueDate (date: String): String {
     val taskDate = date.toLocalDate()
     val now = Clock.System.now()
     val currentDate = now.toLocalDateTime(TimeZone.of("UTC+0")).date
     var numberOfDays = currentDate.daysUntil(taskDate)
     return when {
-        numberOfDays < 0 -> DueTag.O
-        numberOfDays == 0 ->  DueTag.T
-        else ->  DueTag.I
+        numberOfDays < 0 -> DueTag.O.color
+        numberOfDays == 0 ->  DueTag.T.color
+        else ->  DueTag.I.color
     }
 }
 
@@ -67,16 +82,12 @@ fun priorityInput (): String {
     var priority:String
     loop@while (true) {
         println("Input the task priority (C, H, N, L):")
-        priority = readln()
+        priority = (readln()).uppercase()
         priority = when (priority) {
-            "C" -> "C"
-            "H" -> "H"
-            "N" -> "N"
-            "L" -> "L"
-            "c" -> "C"
-            "h" -> "H"
-            "n" -> "N"
-            "l" -> "L"
+            "C" -> Priority.C.color
+            "H" -> Priority.H.color
+            "N" -> Priority.N.color
+            "L" -> Priority.L.color
             else -> continue@loop
         }
         break@loop
@@ -269,7 +280,7 @@ fun deleteTask (taskList: MutableList<MutableList<Any>>) {
             try {
                 println(inputDeleteMessage)
                 taskToBeDeleted = readln().toInt()
-                taskList[taskToBeDeleted-1].clear()
+                taskList.remove(taskList[taskToBeDeleted-1])
                 println(deleteCompleteMessage)
             } catch (e: Exception) {
                 println(taskOutOfRangeMessage)
@@ -283,3 +294,4 @@ fun deleteTask (taskList: MutableList<MutableList<Any>>) {
 fun exit () {
     exitProcess(0)
 }
+
